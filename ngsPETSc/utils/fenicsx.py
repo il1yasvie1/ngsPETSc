@@ -1,6 +1,6 @@
 """
 This module contains all the functions related to wrapping NGSolve meshes to FEniCSx
-We adopt the same docstring conventiona as the FEniCSx project, since this part of
+We adopt the same docstring convention as the FEniCSx project, since this part of
 the package will only be used in combination with FEniCSx.
 """
 
@@ -383,7 +383,7 @@ class GeometricModel:
                 for element, domain in zip(elements, domains)
             ]
         else:
-            if self._mesh.geometry.cmap.degree == order:
+            if self._mesh.geometry.cmap().degree == order:
                 return self._mesh
             function_spaces = [dolfinx.fem.functionspace(self._mesh, elements[0])]
 
@@ -665,7 +665,7 @@ def extract_element_tags(
 
     tdim = dolfinx_mesh.topology.dim
     assert 0 <= dim <= tdim
-    assert dolfinx_mesh.geometry.cmap.degree == 1, (
+    assert dolfinx_mesh.geometry.cmap().degree == 1, (
         "Can only extract element tags from linear grids"
     )
     comm = dolfinx_mesh.comm
