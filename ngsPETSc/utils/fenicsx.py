@@ -383,7 +383,9 @@ class GeometricModel:
                 for element, domain in zip(elements, domains)
             ]
         else:
-            if self._mesh.geometry.cmap().degree == order:
+            _cmap = self._mesh.geometry.cmap
+            cmap = _cmap if not callable(_cmap) else _cmap()
+            if cmap.degree == order:
                 return self._mesh
             function_spaces = [dolfinx.fem.functionspace(self._mesh, elements[0])]
 
