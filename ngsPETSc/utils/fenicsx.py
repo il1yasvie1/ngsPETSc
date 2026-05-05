@@ -348,11 +348,11 @@ class GeometricModel:
         ]
         if is_mixed_mesh:
             if hasattr(self._mesh.geometry._cpp_object, "cmaps"):
-                _cmap = self._mesh.geometry._cpp_object.cmaps(i)
+                _cmap = self._mesh.geometry._cpp_object.cmaps
             else:
-                _cmap = self._mesh.geometry._cpp_object.cmap(i)
+                _cmap = self._mesh.geometry._cpp_object.cmap
             orders = [
-                _cmap.degree
+                _cmap(i).degree
                 for i in range(num_index_maps)
             ]
             assert len(np.unique(orders)) == 1
