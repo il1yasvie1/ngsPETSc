@@ -347,8 +347,12 @@ class GeometricModel:
             for cell in cells
         ]
         if is_mixed_mesh:
+            if hasattr(self._mesh.geometry._cpp_object, "cmaps"):
+                _cmap = self._mesh.geometry._cpp_object.cmaps(i)
+            else:
+                _cmap = self._mesh.geometry._cpp_object.cmap(i)
             orders = [
-                self._mesh.geometry._cpp_object.cmap(i).degree
+                _cmap.degree
                 for i in range(num_index_maps)
             ]
             assert len(np.unique(orders)) == 1
@@ -465,7 +469,10 @@ class GeometricModel:
             # Get coordinates of higher order space on linarized geometry
             if is_mixed_mesh:
                 # Use reference space points here to push forward in FEniCSx
-                cmap = self._mesh.geometry._cpp_object.cmap(i)
+                if hasattr(self._mesh.geometry._cpp_object, "cmaps"):
+                    cmap = self._mesh.geometry._cpp_object.cmaps(i)
+                else:
+                    cmap = self._mesh.geometry._cpp_object.cmap(i)
                 dofmap = self._mesh.geometry._cpp_object.dofmaps(i)
                 coords = self._mesh.geometry.x[dofmap][:, :, :geom_dim].copy()
                 space_dm = X_space._cpp_object.dofmaps(i)
