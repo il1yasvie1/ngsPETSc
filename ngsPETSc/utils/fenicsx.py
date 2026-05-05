@@ -665,7 +665,9 @@ def extract_element_tags(
 
     tdim = dolfinx_mesh.topology.dim
     assert 0 <= dim <= tdim
-    assert dolfinx_mesh.geometry.cmap().degree == 1, (
+    _cmap = self._mesh.geometry.cmap
+    cmap = _cmap if not callable(_cmap) else _cmap()
+    assert cmap.degree == 1, (
         "Can only extract element tags from linear grids"
     )
     comm = dolfinx_mesh.comm
