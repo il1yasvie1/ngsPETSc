@@ -1,6 +1,6 @@
 """
 This module contains all the functions related to wrapping NGSolve meshes to FEniCSx
-We adopt the same docstring conventiona as the FEniCSx project, since this part of
+We adopt the same docstring convention as the FEniCSx project, since this part of
 the package will only be used in combination with FEniCSx.
 """
 
@@ -347,8 +347,12 @@ class GeometricModel:
             for cell in cells
         ]
         if is_mixed_mesh:
+            if hasattr(self._mesh.geometry._cpp_object, "cmaps"):
+                _cmap = self._mesh.geometry._cpp_object.cmaps
+            else:
+                _cmap = self._mesh.geometry._cpp_object.cmap
             orders = [
-                self._mesh.geometry._cpp_object.cmaps(i).degree
+                _cmap(i).degree
                 for i in range(num_index_maps)
             ]
             assert len(np.unique(orders)) == 1
@@ -383,7 +387,9 @@ class GeometricModel:
                 for element, domain in zip(elements, domains)
             ]
         else:
-            if self._mesh.geometry.cmap.degree == order:
+            _cmap = self._mesh.geometry.cmap
+            cmap = _cmap if not callable(_cmap) else _cmap()
+            if cmap.degree == order:
                 return self._mesh
             function_spaces = [dolfinx.fem.functionspace(self._mesh, elements[0])]
 
@@ -463,7 +469,10 @@ class GeometricModel:
             # Get coordinates of higher order space on linarized geometry
             if is_mixed_mesh:
                 # Use reference space points here to push forward in FEniCSx
-                cmap = self._mesh.geometry._cpp_object.cmaps(i)
+                if hasattr(self._mesh.geometry._cpp_object, "cmaps"):
+                    cmap = self._mesh.geometry._cpp_object.cmaps(i)
+                else:
+                    cmap = self._mesh.geometry._cpp_object.cmap(i)
                 dofmap = self._mesh.geometry._cpp_object.dofmaps(i)
                 coords = self._mesh.geometry.x[dofmap][:, :, :geom_dim].copy()
                 space_dm = X_space._cpp_object.dofmaps(i)
@@ -665,7 +674,9 @@ def extract_element_tags(
 
     tdim = dolfinx_mesh.topology.dim
     assert 0 <= dim <= tdim
-    assert dolfinx_mesh.geometry.cmap.degree == 1, (
+    _cmap = dolfinx_mesh.geometry.cmap
+    cmap = _cmap if not callable(_cmap) else _cmap()
+    assert cmap.degree == 1, (
         "Can only extract element tags from linear grids"
     )
     comm = dolfinx_mesh.comm
