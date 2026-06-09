@@ -199,7 +199,12 @@ def createPETScDMPlex(ngMesh, comm, name):
     tdim = comm.bcast(tdim, root=0)
     if comm.rank == 0:
         cells_np = cells.NumPy()
-        V = ngMesh.Coordinates()
+        # Netgen always stores coordinates as float64. createFromCellList performs
+        # a "safe" cast to PetscReal, which rejects a float64 -> float32 narrowing
+        # in single-precision PETSc builds, so cast explicitly here. This is a
+        # no-op when PetscReal is double (the rank != 0 branch below already builds
+        # its empty coordinate array with PETSc.RealType for the same reason).
+        V = ngMesh.Coordinates().astype(PETSc.RealType, copy=False)
         T = trim_util(cells_np["nodes"])
         plex = PETSc.DMPlex().createFromCellList(tdim, T, V, comm=comm)
         vStart, _ = plex.getDepthStratum(0)
