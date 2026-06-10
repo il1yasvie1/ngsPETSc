@@ -88,10 +88,9 @@ def addSimplices(ngMesh, dim, index, data, project_geometry, isoccgeom, edgenr_m
     if len(data) == 0:
         return
     if dim == 1:
+        edgenr = index-1 if isoccgeom else index
         if edgenr_mapping is not None:
-            edgenr = edgenr_mapping[index]
-        else:
-            edgenr = index-1 if isoccgeom else index
+            edgenr = edgenr_mapping.get(index, edgenr)
         for edge in data:
             ngMesh.Add(ngm.Element1D(list(edge+1), index=index, edgenr=edgenr),
                        project_geominfo=project_geometry)
